@@ -2,6 +2,7 @@
 EQUALS_BREAK='=============================================================='
 HEADING_BREAK='-------------------'
 WORD_LIST='./wordlist'
+NUMBER_OF_WORDS=$(cat $WORD_LIST | wc -l)
 MASTERED_LIST='./mastered'
 FAULTED_LIST='./faulted'
 FAILED_LIST='./failed'
@@ -20,7 +21,7 @@ function greeting(){
 }
 
 function enterSelection(){
-	echo 'Enter a selection [n/r/v/c/q]: '
+	echo -n 'Enter a selection [n/r/v/c/q]: '
 	read option
 	case $option in
 		n)
@@ -50,19 +51,22 @@ function newQuiz(){
 	
 }
 function randomNumberInRange(){
-	echo $RANDOM % $1 +1
+	NUMBER=$1
+	RANDOM_NUMBER=$((RANDOM%NUMBER+1))
+	return RANDOM_NUMBER
 }
 function chooseWords(){
-	n1=$(randomNumberInRange \(wc -l $WORD_LIST\))
+	n1=$( randomNumberInRange NUMBER_OF_WORDS )
 	n2=$n1
+
 	while [ $n1 -eq $n2 ]
 	do 
-		n2=$(randomNumberInRange \(wc -l $WORD_LIST\))
+		n2=$( randomNumberInRange NUMBER_OF_WORDS )
 	done
 	n3=$n1
-	while [ $n1 -eq $n3 || $n2 -eq $n3 ]
+	while [ $n1 -eq $n3 -o $n2 -eq $n3 ]
 	do
-		n3=$(randomNumberInRange \(wc -l $WORD_LIST\))
+		n3=$( randomNumberInRange NUMBER_OF_WORDS )
 	done
 }
 function sayWord(){
@@ -82,6 +86,6 @@ function incorrect(){
 function quit(){
 	exit
 }
-
+echo `NUMBER_OF_WORDS`
 greeting
-chooseWords
+
