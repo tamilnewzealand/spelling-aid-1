@@ -6,7 +6,7 @@ NUMBER_OF_WORDS=$(cat $WORD_LIST | wc -l)
 MASTERED_LIST='.mastered'
 FAULTED_LIST='.faulted'
 FAILED_LIST='.failed'
-STATISTICS='.statistics'
+LAST_FAIL_LIST='.lastFailed'
 
 function greeting(){
 	echo $EQUALS_BREAK
@@ -90,12 +90,12 @@ function test1Word(){
 	greeting
 }
 function test2Word(){
-	a=$( randomNumberInRange NUMBER_OF_WORDS )
+	a=$( randomNumberInRange $(cat $1 | wc -l) )
 	b=$a
 
 	while [ $a -eq $b ]
 	do 
-		b=$( randomNumberInRange NUMBER_OF_WORDS )
+		b=$( randomNumberInRange $(cat $1 | wc -l) )
 	done
 
 
@@ -128,17 +128,17 @@ function test2Word(){
 	greeting
 }
 function test3OrMoreWord(){
-	a=$( randomNumberInRange NUMBER_OF_WORDS )
+	a=$( randomNumberInRange $(cat $1 | wc -l) )
 	b=$a
 
 	while [ $a -eq $b ]
 	do 
-		b=$( randomNumberInRange NUMBER_OF_WORDS )
+		b=$( randomNumberInRange $(cat $1 | wc -l) )
 	done
 	c=$b
 	while [ $a -eq $c -o $b -eq $c ]
 	do
-		c=$( randomNumberInRange NUMBER_OF_WORDS )
+		c=$( randomNumberInRange $(cat $1 | wc -l) )
 	done
 	wordNumber=1
 	for i in $a $b $c;
@@ -150,7 +150,8 @@ function test3OrMoreWord(){
 			if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 			then
 					correct
-					echo $(sed -n "${i}p" "$1") >>$MASTERED_LIST 
+					correctList $(sed -n "${i}p" "$1")
+					
 			else
 				echo -n '   Incorrect, try once more: ' 
 				incorrectTryOnceMore
@@ -158,9 +159,9 @@ function test3OrMoreWord(){
 				read currentWord
 				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 				then
-					echo $(sed -n "${i}p" "$1") >>$FAULTED_LIST
+					faultedList $(sed -n "${i}p" "$1")
 				else
-					echo $(sed -n "${i}p" "$1") >>$FAILED_LIST
+					failedList $(sed -n "${i}p" "$1")
 				fi
 			fi
 		
@@ -169,7 +170,18 @@ function test3OrMoreWord(){
 	clear
 	greeting
 }
-
+function correctList(){
+	echo $1 >>$MASTERED_LIST 
+	sed -i "/$1/d" "$LAST_FAIL_LIST"
+}
+function faultedList(){
+	echo $1 >>$FAULTED_LIST 
+	sed -i "/$1/d" "$LAST_FAIL_LIST"
+}
+function failedList(){
+	echo $1 >>$FAILED_LIST 
+	echo $1 >>$LAST_FAIL_LIST 
+}
 function newQuiz(){
 	echo $HEADING_BREAK
 	echo "New Spelling Quiz"
@@ -177,11 +189,12 @@ function newQuiz(){
 	test $WORD_LIST
 }
 function newReview(){
-	#cat $FAILED_LIST | sort -u > .uniqueFailed
+	$LAST_FAILED_LIST | sort -u > $LAST_FAILED_LIST
 	echo $HEADING_BREAK
 	echo "New Spelling Review"
 	echo $HEADING_BREAK
-	test $FAILED_LIST
+	test $LAST_FAIL_LIST
+	greeting
 
 }
 function sayWord(){
@@ -205,11 +218,11 @@ function clearStatistics(){
 	rm -f $MASTERED_LIST
 	rm -f $FAULTED_LIST
 	rm -f $FAILED_LIST
-	rm -f $STATISTICS
+	rm -f $LAST_FAIL_LIST
 	echo >$MASTERED_LIST
 	echo >$FAULTED_LIST
 	echo >$FAILED_LIST
-	cp $WORD_LIST $STATISTICS
+	echo >$LAST_FAIL_LIST
 	echo "Cleared statistics"
 	enterSelection
 	
