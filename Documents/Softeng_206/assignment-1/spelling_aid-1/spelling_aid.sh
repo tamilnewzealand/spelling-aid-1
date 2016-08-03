@@ -7,6 +7,7 @@ MASTERED_LIST='.mastered'
 FAULTED_LIST='.faulted'
 FAILED_LIST='.failed'
 LAST_FAIL_LIST='.lastFailed'
+REVIEW_LIST='.review'
 
 function greeting(){
 	echo $EQUALS_BREAK
@@ -32,7 +33,7 @@ function enterSelection(){
 			newReview
 			;;
 		v|V)
-
+			viewStatistics
 			;;
 		c|C)
 			clearStatistics
@@ -72,8 +73,7 @@ function test1Word(){
 	read currentWord
 	if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 	then
-		correct
-		echo $(sed -n "1p" "$1") >>$MASTERED_LIST 
+		correctList $(sed -n "${i}p" "$1")
 	else
 		echo -n '   Incorrect, try once more: ' 
 		incorrectTryOnceMore
@@ -81,9 +81,9 @@ function test1Word(){
 		read currentWord
 		if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 		then
-			echo $(sed -n "1p" "$1") >>$FAULTED_LIST
+			faultedList $(sed -n "${i}p" "$1")
 		else
-			echo $(sed -n "1p" "$1") >>$FAILED_LIST
+			failedList $(sed -n "${i}p" "$1")
 		fi
 	fi	
 	clear
@@ -107,8 +107,7 @@ function test2Word(){
 			read currentWord
 			if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 			then
-					correct
-					echo $(sed -n "${i}p" "$1") >>$MASTERED_LIST 
+					correctList $(sed -n "${i}p" "$1")
 			else
 				echo -n '   Incorrect, try once more: ' 
 				incorrectTryOnceMore
@@ -116,9 +115,9 @@ function test2Word(){
 				read currentWord
 				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 				then
-					echo $(sed -n "${i}p" "$1") >>$FAULTED_LIST
+					faultedList $(sed -n "${i}p" "$1")
 				else
-					echo $(sed -n "${i}p" "$1") >>$FAILED_LIST
+					failedList $(sed -n "${i}p" "$1")
 				fi
 			fi
 		
@@ -149,7 +148,6 @@ function test3OrMoreWord(){
 			read currentWord
 			if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
 			then
-					correct
 					correctList $(sed -n "${i}p" "$1")
 					
 			else
@@ -171,14 +169,17 @@ function test3OrMoreWord(){
 	greeting
 }
 function correctList(){
+	correct
 	echo $1 >>$MASTERED_LIST 
 	sed -i "/$1/d" "$LAST_FAIL_LIST"
 }
 function faultedList(){
+	correct
 	echo $1 >>$FAULTED_LIST 
 	sed -i "/$1/d" "$LAST_FAIL_LIST"
 }
 function failedList(){
+	incorrect
 	echo $1 >>$FAILED_LIST 
 	echo $1 >>$LAST_FAIL_LIST 
 }
@@ -189,11 +190,13 @@ function newQuiz(){
 	test $WORD_LIST
 }
 function newReview(){
-	$LAST_FAILED_LIST | sort -u > $LAST_FAILED_LIST
+	
 	echo $HEADING_BREAK
 	echo "New Spelling Review"
 	echo $HEADING_BREAK
-	test $LAST_FAIL_LIST
+	sort $LAST_FAIL_LIST | uniq >$REVIEW_LIST
+	sed -i '/^$/d' $REVIEW_LIST
+	test $REVIEW_LIST
 	greeting
 
 }
@@ -211,7 +214,17 @@ function incorrect(){
 	echo "Incorrect. " | festival --tts		
 }
 function viewStatistics(){
-	echo "to be implemented"
+	echo -e "Word      \tMastered\tFaulted  \tFailed"
+	while read line; 
+	do
+		if [ `grep -c "$line" "$MASTERED_LIST"` -ne 0 ] || [ `grep -c "$line" "$FAULTED_LIST"` -ne 0 ] || [ `grep -c "$line" "$FAILED_LIST"` -ne 0 ]
+		then
+			echo -en "$line     "
+			echo -en "\t\t`grep -c "$line" "$MASTERED_LIST"`"
+			echo -en "\t\t`grep -c "$line" "$FAULTED_LIST"`"
+			echo -en "\t\t`grep -c "$line" "$FAILED_LIST"`\n"
+		fi
+	done <$WORD_LIST
 	greeting
 }
 function clearStatistics(){
@@ -219,10 +232,12 @@ function clearStatistics(){
 	rm -f $FAULTED_LIST
 	rm -f $FAILED_LIST
 	rm -f $LAST_FAIL_LIST
+	rm -f $REVIEW_LIST
 	echo >$MASTERED_LIST
 	echo >$FAULTED_LIST
 	echo >$FAILED_LIST
 	echo >$LAST_FAIL_LIST
+	echo >$REVIEW_LIST
 	echo "Cleared statistics"
 	enterSelection
 	
