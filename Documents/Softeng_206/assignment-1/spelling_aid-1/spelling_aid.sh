@@ -9,6 +9,14 @@ FAILED_LIST='.failed'
 LAST_FAIL_LIST='.lastFailed'
 REVIEW_LIST='.review'
 
+
+function setUpHiddenFiles(){
+	echo >>$MASTERED_LIST
+	echo >>$FAULTED_LIST
+	echo >>$FAILED_LIST
+	echo >>$LAST_FAIL_LIST
+	echo >>$REVIEW_LIST
+}
 function greeting(){
 	echo $EQUALS_BREAK
 	echo 'Welcome to the Spelling Aid'
@@ -214,15 +222,12 @@ function clearStatistics(){
 	rm -f $FAILED_LIST
 	rm -f $LAST_FAIL_LIST
 	rm -f $REVIEW_LIST
-	echo >$MASTERED_LIST
-	echo >$FAULTED_LIST
-	echo >$FAILED_LIST
-	echo >$LAST_FAIL_LIST
-	echo >$REVIEW_LIST
+	setUpHiddenFiles
 	echo "Cleared statistics"
 	enterSelection
 	
 }
+#quits with a nice-looking animation
 function quit(){
 	clear
 	echo $HEADING_BREAK
@@ -266,5 +271,6 @@ function quit(){
 	echo $HEADING_BREAK
 	exit
 }
+setUpHiddenFiles
 greeting
 
