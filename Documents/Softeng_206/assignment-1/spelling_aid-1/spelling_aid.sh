@@ -69,21 +69,21 @@ function test(){
 }
 function test1Word(){
 	echo -n "Spell word 1 of 1: " 
-	sayWord $(sed -n "${i}p" "$1")
+	sayWord $(sed -n "1p" "$1")
 	read currentWord
-	if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
+	if [ "$currentWord" == "$(sed -n "1p" "$1")" ];
 	then
-		correctList $(sed -n "${i}p" "$1")
+		correctList $(sed -n "1p" "$1")
 	else
 		echo -n '   Incorrect, try once more: ' 
-		incorrectTryOnceMore
+		incorrectTryOnceMore $(sed -n "${i}p" "$1")
 		sayWord $(sed -n "1p" "$1")
 		read currentWord
-		if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
+		if [ "$currentWord" == "$(sed -n "1p" "$1")" ];
 		then
-			faultedList $(sed -n "${i}p" "$1")
+			faultedList $(sed -n "1p" "$1")
 		else
-			failedList $(sed -n "${i}p" "$1")
+			failedList $(sed -n "1p" "$1")
 		fi
 	fi	
 	clear
@@ -110,7 +110,7 @@ function test2Word(){
 					correctList $(sed -n "${i}p" "$1")
 			else
 				echo -n '   Incorrect, try once more: ' 
-				incorrectTryOnceMore
+				incorrectTryOnceMore $(sed -n "${i}p" "$1")
 				sayWord $(sed -n "${i}p" "$1")
 				read currentWord
 				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
@@ -152,7 +152,7 @@ function test3OrMoreWord(){
 					
 			else
 				echo -n '   Incorrect, try once more: ' 
-				incorrectTryOnceMore
+				incorrectTryOnceMore $(sed -n "${i}p" "$1")
 				sayWord $(sed -n "${i}p" "$1")
 				read currentWord
 				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
@@ -201,11 +201,13 @@ function newReview(){
 
 }
 function sayWord(){
-	echo "$1; $1 " | festival --tts 
+	echo "$1;" | festival --tts 
 }
 function incorrectTryOnceMore(){
 	incorrect
-	echo "Try once more" | festival --tts		
+	echo "Try once more" | festival --tts
+	sayWord $1
+		
 }
 function correct(){
 	echo "Correct. " | festival --tts
@@ -214,15 +216,15 @@ function incorrect(){
 	echo "Incorrect. " | festival --tts		
 }
 function viewStatistics(){
-	echo -e "Word      \tMastered\tFaulted  \tFailed"
+	echo -e "Word\t\tMast\tFault\tFail"
 	while read line; 
 	do
 		if [ `grep -c "$line" "$MASTERED_LIST"` -ne 0 ] || [ `grep -c "$line" "$FAULTED_LIST"` -ne 0 ] || [ `grep -c "$line" "$FAILED_LIST"` -ne 0 ]
 		then
 			echo -en "$line     "
-			echo -en "\t\t`grep -c "$line" "$MASTERED_LIST"`"
-			echo -en "\t\t`grep -c "$line" "$FAULTED_LIST"`"
-			echo -en "\t\t`grep -c "$line" "$FAILED_LIST"`\n"
+			echo -en "\t`grep -c "$line" "$MASTERED_LIST"`"
+			echo -en "\t`grep -c "$line" "$FAULTED_LIST"`"
+			echo -en "\t`grep -c "$line" "$FAILED_LIST"`\n"
 		fi
 	done <$WORD_LIST
 	greeting
