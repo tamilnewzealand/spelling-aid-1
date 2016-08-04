@@ -69,23 +69,7 @@ function test(){
 }
 function test1Word(){
 	echo -n "Spell word 1 of 1: " 
-	sayWord $(sed -n "1p" "$1")
-	read currentWord
-	if [ "$currentWord" == "$(sed -n "1p" "$1")" ];
-	then
-		correctList $(sed -n "1p" "$1")
-	else
-		echo -n '   Incorrect, try once more: ' 
-		incorrectTryOnceMore $(sed -n "${i}p" "$1")
-		sayWord $(sed -n "1p" "$1")
-		read currentWord
-		if [ "$currentWord" == "$(sed -n "1p" "$1")" ];
-		then
-			faultedList $(sed -n "1p" "$1")
-		else
-			failedList $(sed -n "1p" "$1")
-		fi
-	fi	
+	ifStatementInTest $1 1
 	clear
 	greeting
 }
@@ -98,31 +82,15 @@ function test2Word(){
 		b=$( randomNumberInRange $(cat $1 | wc -l) )
 	done
 
-
 	wordNumber=1
 	for i in $a $b;
 		do
 			echo -n "Spell word $wordNumber of 2: " 
 			sayWord $(sed -n "${i}p" "$1")
-			read currentWord
-			if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
-			then
-					correctList $(sed -n "${i}p" "$1")
-			else
-				echo -n '   Incorrect, try once more: ' 
-				incorrectTryOnceMore $(sed -n "${i}p" "$1")
-				sayWord $(sed -n "${i}p" "$1")
-				read currentWord
-				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
-				then
-					faultedList $(sed -n "${i}p" "$1")
-				else
-					failedList $(sed -n "${i}p" "$1")
-				fi
-			fi
+			ifStatementInTest $1 $i
 		
-		wordNumber=$((wordNumber+1))
-	done
+			wordNumber=$((wordNumber+1))
+		done
 	clear
 	greeting
 }
@@ -143,30 +111,35 @@ function test3OrMoreWord(){
 	for i in $a $b $c;
 		do
 			echo -n "Spell word $wordNumber of 3: " 
-			sayWord $(sed -n "${i}p" "$1")
-			declare -l currentWord
-			read currentWord
-			if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
-			then
-					correctList $(sed -n "${i}p" "$1")
-					
-			else
-				echo -n '   Incorrect, try once more: ' 
-				incorrectTryOnceMore $(sed -n "${i}p" "$1")
-				sayWord $(sed -n "${i}p" "$1")
-				read currentWord
-				if [ "$currentWord" == "$(sed -n "${i}p" "$1")" ];
-				then
-					faultedList $(sed -n "${i}p" "$1")
-				else
-					failedList $(sed -n "${i}p" "$1")
-				fi
-			fi
+			ifStatementInTest $1 $i
 		
 		wordNumber=$((wordNumber+1))
 	done
 	clear
 	greeting
+}
+function ifStatementInTest(){
+	#$1 argument is the file
+	#$2 argument is line number of word
+	sayWord $(sed -n "${2}p" "$1")
+	declare -l currentWord
+	read currentWord
+	if [ "$currentWord" == "$(sed -n "${2}p" "$1")" ];
+	then
+		correctList $(sed -n "${2}p" "$1")
+			
+	else
+		echo -n '   Incorrect, try once more: ' 
+		incorrectTryOnceMore $(sed -n "${2}p" "$1")
+		sayWord $(sed -n "${2}p" "$1")
+		read currentWord
+		if [ "$currentWord" == "$(sed -n "${2}p" "$1")" ];
+		then
+			faultedList $(sed -n "${2}p" "$1")
+		else
+			failedList $(sed -n "${2}p" "$1")
+		fi
+	fi
 }
 function correctList(){
 	correct
@@ -243,9 +216,48 @@ function clearStatistics(){
 	echo "Cleared statistics"
 	enterSelection
 	
-	
 }
 function quit(){
+	clear
+	echo $HEADING_BREAK
+	echo "Thank You!"
+	echo ' 0  0 '
+	echo '      '
+	echo '   o  '
+	echo $HEADING_BREAK
+	sleep 0.5s
+	clear
+	echo $HEADING_BREAK
+	echo "Thank You!"
+	echo ' 0  0 '
+	echo '   >  '
+	echo '   _  '
+	echo $HEADING_BREAK
+	sleep 0.5s
+	clear
+	echo $HEADING_BREAK
+	echo "Thank You!"
+	echo ' 0  0 '
+	echo '   >  '
+	echo '  \_/ '
+	echo $HEADING_BREAK
+	sleep 0.5s
+	clear
+	echo $HEADING_BREAK
+	echo "Thank You!"
+	echo ' ^  ^ '
+	echo '   >  '
+	echo '  \_/ '
+	echo $HEADING_BREAK
+	sleep 0.5s
+	clear
+	echo $HEADING_BREAK
+	echo "Thank You!"
+	echo ' ^  ^  /^\/^\ '
+	echo '   >   \    / '
+	echo '  \_/   \  /  '
+	echo '         \/   '
+	echo $HEADING_BREAK
 	exit
 }
 greeting
