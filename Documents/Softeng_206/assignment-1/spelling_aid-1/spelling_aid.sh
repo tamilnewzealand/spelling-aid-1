@@ -52,6 +52,7 @@ function randomNumberInRange(){
 	RANDOM_NUMBER=$((RANDOM % $NUMBER+1))
 	echo $RANDOM_NUMBER
 }
+#calls required test function as per number of possible words to test
 function test(){
 	if [ $(grep -c ^ $1) -ge 3 ];
 	then
@@ -118,6 +119,8 @@ function test3OrMoreWord(){
 	clear
 	greeting
 }
+#says the word at the given line number, and compares it to the typed word by the user as required by the test
+#result of comparison determines how test proceeds
 function ifStatementInTest(){
 	#$1 argument is the file
 	#$2 argument is line number of word
@@ -126,7 +129,7 @@ function ifStatementInTest(){
 	read currentWord
 	if [ "$currentWord" == "$(sed -n "${2}p" "$1")" ];
 	then
-		correctList $(sed -n "${2}p" "$1")
+		masteredList $(sed -n "${2}p" "$1")
 			
 	else
 		echo -n '   Incorrect, try once more: ' 
@@ -141,16 +144,19 @@ function ifStatementInTest(){
 		fi
 	fi
 }
-function correctList(){
+#sends mastered words to the correct lists
+function masteredList(){
 	correct
 	echo $1 >>$MASTERED_LIST 
 	sed -i "/$1/d" "$LAST_FAIL_LIST"
 }
+#sends faulted words to the correct lists
 function faultedList(){
 	correct
 	echo $1 >>$FAULTED_LIST 
 	sed -i "/$1/d" "$LAST_FAIL_LIST"
 }
+#sends fail words to the correct lists
 function failedList(){
 	incorrect
 	echo $1 >>$FAILED_LIST 
